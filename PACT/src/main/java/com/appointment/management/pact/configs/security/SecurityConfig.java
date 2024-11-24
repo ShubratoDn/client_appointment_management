@@ -1,56 +1,47 @@
 package com.appointment.management.pact.configs.security;
 
-import com.appointment.management.pact.configs.CustomAuthenticationFailureHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 
+import com.appointment.management.pact.configs.CustomAuthenticationFailureHandler;
+import com.appointment.management.pact.configs.LoginSuccessHandler;
 
-//@EnableWebSecurity
+
+@EnableWebSecurity
 @Configuration
-//@EnableWebMvc
 public class SecurityConfig {
-//    @Bean
-//    InternalResourceViewResolver viewResolver() {
-//        InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-//        viewResolver.setPrefix("/WEB-INF/views/");
-//        viewResolver.setSuffix(".jsp");
-//        return viewResolver;
-//    }
-
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http.cors().and().csrf().disable()
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers("/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/user/**").hasRole("USER")
-//                                .requestMatchers("/login").anonymous() //
-                                .requestMatchers("/register").permitAll()
-                                .requestMatchers("/**").permitAll()
-                                .requestMatchers("/js/**").permitAll()
-                                .requestMatchers("/css/**").permitAll()
-                                .requestMatchers("/assets/**").permitAll()
-                                .anyRequest().authenticated()
-                )
-                .logout().logoutUrl("/logout")
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/user/dashboard")
-                .failureHandler(new CustomAuthenticationFailureHandler());
+    	 http.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults())
+         .authorizeHttpRequests(auth ->
+                 auth
+                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                         .requestMatchers("/user/**").hasRole("USER")
+//                         .requestMatchers("/login").anonymous() //
+                         .requestMatchers("/register").permitAll()
+                         .requestMatchers("/WEB-INF/**").permitAll()
+                         .requestMatchers("/js/**").permitAll()
+                         .requestMatchers("/css/**").permitAll()
+                         .requestMatchers("/assets/**").permitAll()
+                         .anyRequest().authenticated()
+         )
+         .logout(logout -> logout.logoutUrl("/logout"))
+         .formLogin(login -> login
+					.loginPage("/login").permitAll()
+					.successHandler(loginSuccessHandler())
+					.failureHandler(new CustomAuthenticationFailureHandler()));
+    	
 
         http.authenticationProvider(myAuthenticationProvider());
 
@@ -58,6 +49,10 @@ public class SecurityConfig {
         return build;
     }
 
+    @Bean
+    public LoginSuccessHandler loginSuccessHandler() {
+        return new LoginSuccessHandler();
+    }
 
     @Bean
     public DaoAuthenticationProvider myAuthenticationProvider() {
