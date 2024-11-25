@@ -34,6 +34,7 @@ public class SecurityConfig {
                          .requestMatchers("/js/**").permitAll()
                          .requestMatchers("/css/**").permitAll()
                          .requestMatchers("/assets/**").permitAll()
+                         .requestMatchers("/verification", "/forgot-password", "/verify-otp", "/verify-forget-password","/reset-password").permitAll()
                          .anyRequest().authenticated()
          )
          .logout(logout -> logout.logoutUrl("/logout"))
