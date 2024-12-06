@@ -8,6 +8,16 @@
                     <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                     Dashboard
                 </a>
+
+                <div class="sb-sidenav-menu-heading">AVAILABILITY</div>
+                <a class="nav-link" href="/set-availability">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    Setup Availability
+                </a>
+
+
                 <div class="sb-sidenav-menu-heading">APPOINTMENT</div>
                 <a class="nav-link" href="/book-appointment">
                     <div class="sb-nav-link-icon">
