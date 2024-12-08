@@ -13,4 +13,5 @@ public interface UserService {
     User findUserByUsername(String username);
     User findUserByToken(String token);
     User findUserByUsernameOrEmail(String username, String mail);
+    List<User> searchUser(String searchQuery);
 }

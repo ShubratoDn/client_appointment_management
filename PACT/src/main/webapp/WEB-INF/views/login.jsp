@@ -55,11 +55,11 @@
                                             %>
 
                                             <div class="form-floating mb-3">
-                                                <input class="form-control" id="inputEmail" type="text" placeholder="name@example.com" name="username"/>
+                                                <input class="form-control" value="shubratodn44985@gmail.com" id="inputEmail" type="text" placeholder="name@example.com" name="username"/>
                                                 <label for="inputEmail">Email address</label>
                                             </div>
                                             <div class="form-floating mb-3">
-                                                <input class="form-control" id="inputPassword" type="password" placeholder="Password" name="password" />
+                                                <input class="form-control" value="1111" id="inputPassword" type="password" placeholder="Password" name="password" />
                                                 <label for="inputPassword">Password</label>
                                             </div>
                                             <div class="form-check mb-3">

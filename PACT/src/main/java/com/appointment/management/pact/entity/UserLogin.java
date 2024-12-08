@@ -1,5 +1,7 @@
 package com.appointment.management.pact.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,5 +26,13 @@ public class UserLogin {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    // Getters and Setters
+    @JsonIgnore
+    public User getUser() {
+        return user;
+    }
+
+    @JsonProperty
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

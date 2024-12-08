@@ -84,4 +84,11 @@ public class UserServiceImpl implements UserService {
 
         return token.toString();
     }
+
+
+    @Override
+    public List<User> searchUser(String searchQuery) {
+        List<User> userList = userRepository.findByUsernameContainingOrEmailContainingOrFullnameContaining(searchQuery, searchQuery, searchQuery);
+        return userList;
+    }
 }
