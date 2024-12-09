@@ -2,7 +2,6 @@ package com.appointment.management.pact.controllers;
 
 import com.appointment.management.pact.entity.User;
 import com.appointment.management.pact.repository.UserAvailabilityRepository;
-import com.appointment.management.pact.services.HelperService;
 import com.appointment.management.pact.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;

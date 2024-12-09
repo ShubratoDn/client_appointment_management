@@ -55,6 +55,27 @@
                     </div>
                     <div class="modal-body">
                         <p id="availabilityMessage">Checking availability...</p>
+
+                        <form action="/appointment-request/{userId}" method="post" id="appointmentRequestForm" style="display: none;">
+                            <label>Appointment Starting Time</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Starting Time : </span>
+                                </div>
+                                <input type="time" class="form-control" id="appointmentStartingTime" aria-describedby="basic-addon3">
+                            </div>
+
+                            <label>Appointment Ending Time</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Ending Time : </span>
+                                </div>
+                                <input type="time" class="form-control" id="appointmentEndingTime" aria-describedby="basic-addon3">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" id="submitAppointmentRequest">Submit</button>
+                        </form>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="closeModal()">Close</button>
@@ -93,8 +114,10 @@
                 $('#availabilityModal').modal('hide');
             }
 
-        // Attach click event listener to all elements with the class 'mbsc-calendar-cell-text'
-            // Attach click event listener to the calendar cell
+
+            // Extract user ID from the current URL
+            const currentUrl = window.location.href;
+            const userId = currentUrl.split('/').pop(); // Assumes user ID is the last segment of the URL
             document.addEventListener('click', function (event) {
                 // Check if the clicked element is a calendar cell with the desired class
                 if (event.target.classList.contains('mbsc-calendar-cell-text')) {
@@ -102,7 +125,8 @@
                     const ariaLabel = event.target.getAttribute('aria-label');
                     if (ariaLabel) {
                         // Extract the date from the aria-label (assuming format like "Monday, December 9, 2024")
-                        const date = ariaLabel.split(', ')[1];
+                        // const date = ariaLabel.split(', ')[1];
+
 
                         // Show the modal
                         $('#availabilityModal').modal('show');
@@ -110,24 +134,85 @@
                         // Display the loading message
                         $('#availabilityMessage').text('Checking availability...');
 
+                        var encodedDate = encodeURIComponent(ariaLabel);
+                        var requestURL = "/check-availability/userID/"+userId+"/"+encodedDate;
+
                         // Send the AJAX request
                         $.ajax({
-                            url: `/check-availability/${(date)}`,
+                            url: requestURL,
                             method: 'GET',
                             success: function (data) {
-                                // Update the modal with the response
-                                $('#availabilityMessage').text(
-                                    data.available ? 'The date is available!' : 'The date is not available.'
-                                );
+                                console.log(data);
+
+                                // Extract details
+                                const availableDate = data.availableDate;
+                                const startTime = data.workingHourStart;
+                                const endTime = data.workingHourEnd;
+
+                                // Create the message
+                                const message = `
+                                    Availability Details:
+                                    - Date: `+ ariaLabel + `
+                                    - Start Time: `+startTime + ` (24-hour format)
+                                    - End Time: `+endTime+` (24-hour format)
+                                `;
+
+                                // Show the form after successful availability check
+                                $('#appointmentRequestForm').show();
+
+                                // Set the min and max properties for the input fields
+                                $('#appointmentStartingTime').attr('min', startTime);
+                                $('#appointmentEndingTime').attr('max', endTime);
+
+
+                                // Update the modal with the formatted response
+                                $('#availabilityMessage').html(message.replace(/\n/g, '<br>')); // Replace newlines with <br> for HTML display
                             },
-                            error: function () {
+                            error: function (err) {
+                                $('#appointmentRequestForm').hide();
+                                console.log(err);
                                 // Handle errors
-                                $('#availabilityMessage').text('An error occurred while checking availability.');
+                                $('#availabilityMessage').text(err.responseText);
                             }
                         });
+
                     }
                 }
             });
+
+            // Handle form submission via AJAX
+            $('#appointmentRequestForm').submit(function (e) {
+                e.preventDefault(); // Prevent the default form submission
+
+                const startingTime = $('#appointmentStartingTime').val();
+                const endingTime = $('#appointmentEndingTime').val();
+
+                if (!startingTime || !endingTime) {
+                    alert("Both starting and ending times are required.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/appointment-request/' + userId, // Update with the actual userId dynamically
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        startingTime: startingTime,
+                        endingTime: endingTime,
+                    }),
+                    success: function (response) {
+                        alert('Appointment request submitted successfully!');
+                        // Optionally hide the form after submission
+                        $('#appointmentRequestForm').hide();
+                    },
+                    error: function (err) {
+                        console.log(err);
+                        alert('An error occurred while submitting the appointment request.');
+                    }
+                });
+            });
+
+
 
 
 

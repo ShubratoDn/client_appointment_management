@@ -9,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +49,8 @@ public class AvailabilityController {
 
         // Save new availability data
         for (String date : request.getAvailableDates()) {
-            // Parse the date string to ZonedDateTime, adjust the time zone, and get the LocalDate
+            // Parse the date string to ZonedDateTime, adjust the time zone, and get the
+            // LocalDate
             ZonedDateTime zonedDateTime = ZonedDateTime.parse(date);
 
             // Adjust to the system default time zone
@@ -69,4 +68,7 @@ public class AvailabilityController {
 
         return ResponseEntity.ok("Availability set successfully!");
     }
+
+    
+
 }
