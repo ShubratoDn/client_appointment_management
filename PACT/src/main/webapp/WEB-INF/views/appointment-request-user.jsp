@@ -49,7 +49,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="availabilityModalLabel">Check Availability</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="closeModal()">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
@@ -57,23 +57,40 @@
                         <p id="availabilityMessage">Checking availability...</p>
 
                         <form action="/appointment-request/{userId}" method="post" id="appointmentRequestForm" style="display: none;">
+                            <!-- Appointment Starting Time -->
                             <label>Appointment Starting Time</label>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text">Starting Time : </span>
+                                    <span class="input-group-text">Starting Time:</span>
                                 </div>
-                                <input type="time" class="form-control" id="appointmentStartingTime" aria-describedby="basic-addon3">
+                                <input type="time" class="form-control" id="appointmentStartingTime" name="appointmentStartingTime" aria-describedby="basic-addon3" required>
                             </div>
 
+                            <!-- Appointment Ending Time -->
                             <label>Appointment Ending Time</label>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text">Ending Time : </span>
+                                    <span class="input-group-text">Ending Time:</span>
                                 </div>
-                                <input type="time" class="form-control" id="appointmentEndingTime" aria-describedby="basic-addon3">
+                                <input type="time" class="form-control" id="appointmentEndingTime" name="appointmentEndingTime" aria-describedby="basic-addon3" required>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" id="submitAppointmentRequest">Submit</button>
+                            <!-- Description (Required) -->
+                            <label>Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter appointment description..." required></textarea>
+
+                            <!-- Is All Day -->
+                            <div class="form-check mt-3">
+                                <input type="checkbox" class="form-check-input" id="isAllDay" name="isAllDay">
+                                <label class="form-check-label" for="isAllDay">Is this an all-day event?</label>
+                            </div>
+
+                            <!-- Location (Optional) -->
+                            <label class="mt-3">Location (Optional)</label>
+                            <input type="text" class="form-control" id="location" name="location" placeholder="Enter location (optional)">
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary mt-3" id="submitAppointment">Submit Appointment</button>
                         </form>
 
                     </div>
@@ -180,34 +197,54 @@
                 }
             });
 
+
+            $('#appointmentStartingTime, #appointmentEndingTime').on('change', function () {
+                const startTime = $('#appointmentStartingTime').val();
+                const endTime = $('#appointmentEndingTime').val();
+
+                if (startTime && endTime && startTime > endTime) {
+                    alert('Starting time cannot be later than the ending time!');
+                    $(this).val(''); // Clear the invalid input
+                }
+            });
+
             // Handle form submission via AJAX
             $('#appointmentRequestForm').submit(function (e) {
                 e.preventDefault(); // Prevent the default form submission
 
-                const startingTime = $('#appointmentStartingTime').val();
-                const endingTime = $('#appointmentEndingTime').val();
+                const appointmentData = {
+                    startTime: $('#appointmentStartingTime').val(),
+                    endTime: $('#appointmentEndingTime').val(),
+                    description: $('#description').val(),
+                    isAllDay: $('#isAllDay').is(':checked'),
+                    location: $('#location').val(),
+                };
 
-                if (!startingTime || !endingTime) {
-                    alert("Both starting and ending times are required.");
+                // Validate required fields
+                if (!appointmentData.description) {
+                    alert('Description is required.');
                     return;
                 }
 
+                if (!appointmentData.startTime || !appointmentData.endTime) {
+                    alert('Both starting and ending times are required.');
+                    return;
+                }
+
+                // Send the AJAX request
                 $.ajax({
-                    url: '/appointment-request/' + userId, // Update with the actual userId dynamically
+                    url: `/appointment-request/${userId}`,
                     method: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({
-                        startingTime: startingTime,
-                        endingTime: endingTime,
-                    }),
+                    data: JSON.stringify(appointmentData),
                     success: function (response) {
-                        alert('Appointment request submitted successfully!');
-                        // Optionally hide the form after submission
-                        $('#appointmentRequestForm').hide();
+                        alert('Appointment successfully submitted!');
+                        // Optional: Close the modal or clear the form
+                        // $('#appointmentRequestForm')[0].reset();
                     },
                     error: function (err) {
                         console.log(err);
-                        alert('An error occurred while submitting the appointment request.');
+                        alert('An error occurred while submitting the appointment.');
                     }
                 });
             });
