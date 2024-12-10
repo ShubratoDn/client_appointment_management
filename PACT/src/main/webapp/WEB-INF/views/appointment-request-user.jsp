@@ -1,5 +1,6 @@
 <%@ page import="com.appointment.management.pact.entity.User" %>
 <%@ page import="java.util.List" %>
+<%@ page import="com.appointment.management.pact.entity.UserAppointment" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -247,7 +248,8 @@
                     },
                     error: function (err) {
                         console.log(err);
-                        alert('An error occurred while submitting the appointment.');
+                        $('#availabilityMessage').text(err.responseText);
+                        alert(err.responseText);
                     }
                 });
             });
@@ -273,7 +275,32 @@
 
         var now = new Date();
 
-        mobiscroll.eventcalendar('#demo-multi-day', {
+
+            var appointments = [
+                <%
+                    List<UserAppointment> appointments = (List<UserAppointment>) request.getAttribute("allAppointment");
+                    String titleColor = "#7bde83"; // Default color
+                    for (int i = 0; i < appointments.size(); i++) {
+                        UserAppointment ua = appointments.get(i);
+                        String startTime = ua.getAppointment().getStartTime().toString(); // Format: YYYY-MM-DDTHH:mm
+                        String endTime = ua.getAppointment().getEndTime().toString();   // Format: YYYY-MM-DDTHH:mm
+                        String title = ua.getAppointment().getDescription();
+                        out.print("{");
+                        out.print("start: '" + startTime + "', ");
+                        out.print("end: '" + endTime + "', ");
+                        out.print("title: '" + title + "', ");
+                        out.print("color: '" + titleColor + "'");
+                        out.print("}");
+                        if (i < appointments.size() - 1) {
+                            out.print(", ");
+                        }
+                    }
+                %>
+            ];
+
+
+
+            mobiscroll.eventcalendar('#demo-multi-day', {
             controls: ['calendar', 'time'],
             theme: 'ios',
             min: min,
@@ -291,33 +318,14 @@
                 console.log('Date clicked:', event.date);
             },
             onEventCreated: function (args) {
-               // alert("alert")
+
             },
             view: {
                 calendar: {
                     labels: true,
                 },
             },
-            data: [
-                {
-                    start: '2024-12-07T09:00',
-                    end: '2024-12-10T18:00',
-                    title: 'Business of Software Conference',
-                    color: '#ff6d42',
-                },
-                {
-                    start: '2024-12-07T13:00',
-                    end: '2024-12-08T21:00',
-                    title: 'Friends binge marathon',
-                    color: '#7bde83',
-                },
-                {
-                    start: '2024-12-14T13:00',
-                    end: '2024-12-15T21:00',
-                    title: 'Friends binge marathon',
-                    color: '#7bde83',
-                },
-            ],
+            data: appointments,
         });
 
     </script>

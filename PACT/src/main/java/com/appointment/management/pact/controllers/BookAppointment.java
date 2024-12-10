@@ -64,6 +64,9 @@ public class BookAppointment {
 		// Add available dates to the model
 		model.addAttribute("availableDates", availableDates);
 
+		List<UserAppointment> allByAuthor = userAppointmentRepository.findAllByAuthor(userid);
+		model.addAttribute("allAppointment", allByAuthor);
+
 		return "appointment-request-user";
 	}
 
@@ -100,7 +103,13 @@ public class BookAppointment {
 		System.out.println("Merged Start Date Time: " + startDateTime);
 		System.out.println("Merged End Date Time: " + endDateTime);
 
+//		boolean userAvailable = userAppointmentRepository.isUserAvailable(userId, startDateTime, endDateTime);
 
+		List<UserAppointment> overlappingAppointments = userAppointmentRepository.findOverlappingAppointments(userId, startDateTime, endDateTime);
+
+		if (!overlappingAppointments.isEmpty()) {
+			return ResponseEntity.status(400).body("Author is not available within "+ appointmentRequest.getStartTime() + " and "+ appointmentRequest.getEndTime());
+		}
 
 
 		// Create Appointment entity
@@ -121,12 +130,12 @@ public class BookAppointment {
 		userAppointment.setStatus("PENDING");
 		User loggedInUser = HelperService.getLoggedInUser();
 		loggedInUser.setUserAppointments(null);
-		userAppointment.setAuthor(loggedInUser);
+		userAppointment.setRequested_user(loggedInUser);
 
 		// Mocked User association
 		User user = new User(); // Fetch an actual User object from the DB
 		user.setUserId(userId);
-		userAppointment.setRequested_user(user);
+		userAppointment.setAuthor(user);
 
 
 		appointment = appointmentRepository.save(appointment);

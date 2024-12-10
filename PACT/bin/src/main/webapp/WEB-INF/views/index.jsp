@@ -1,6 +1,3 @@
-<%@ page import="com.appointment.management.pact.entity.UserAppointment" %>
-<%@ page import="java.util.List" %>
-<%@ page import="com.appointment.management.pact.services.HelperService" %>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -24,20 +21,6 @@
                         </ol>
                         <div class="row">
                             <div class="col-xl-3 col-md-6">
-                                <%
-                                    List<UserAppointment> upcomingAppointments = (List<UserAppointment>) request.getAttribute("upcomingAppointments");
-                                    if (upcomingAppointments!= null &&!upcomingAppointments.isEmpty()) {
-                                        out.println("<h3>Upcoming Appointments : "+upcomingAppointments.size()+"</h3>");
-                                        for (UserAppointment appointment : upcomingAppointments) {
-                                            Integer userId = appointment.getAuthor().getUserId();
-                                            Integer logged = HelperService.getLoggedInUser().getUserId();
-                                            out.println("<div class=\"alert alert-primary\" role=\"alert\">");
-                                            out.println("Upcoming appointment with " + ((userId == logged) ? appointment.getRequested_user().getFullname() : appointment.getAuthor().getFullname()));
-                                            out.println("Schedule: " + appointment.getAppointment().getStartTime() + " at " + appointment.getAppointment().getEndTime());
-                                            out.println("</div>");
-                                        }
-                                    }
-                                %>
                                 <div class="card bg-primary text-white mb-4">
                                     <div class="card-body">Primary Card</div>
                                     <div class="card-footer d-flex align-items-center justify-content-between">

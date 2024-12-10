@@ -23,6 +23,8 @@ public class GlobalExceptionHandler {
         response.put("message", ex.getMessage());
         response.put("path", "/error");
 
+        ex.printStackTrace();
+
         return "404";
     }
 
@@ -34,6 +36,8 @@ public class GlobalExceptionHandler {
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
         response.put("message", ex.getMessage());
+
+        ex.printStackTrace();
 
         return "500";
     }
