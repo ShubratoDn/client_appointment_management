@@ -2,6 +2,7 @@ package com.appointment.management.pact.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "appointments")
 @Data
+@ToString
 public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +18,7 @@ public class Appointment {
     private Integer appointmentId;
 
     @ManyToOne
-    @JoinColumn(name = "calendar_id", nullable = false)
+    @JoinColumn(name = "calendar_id", nullable = true)
     private Calendar calendar;
 
     @Column(name = "start_time")
@@ -36,9 +38,5 @@ public class Appointment {
 
     @Column(name = "is_all_day")
     private Boolean isAllDay;
-
-    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL)
-    private List<UserAppointment> userAppointments;
-
     // Getters and Setters
 }

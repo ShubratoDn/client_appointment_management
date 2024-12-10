@@ -135,6 +135,7 @@
             // Extract user ID from the current URL
             const currentUrl = window.location.href;
             const userId = currentUrl.split('/').pop(); // Assumes user ID is the last segment of the URL
+            var selectedDate ;
             document.addEventListener('click', function (event) {
                 // Check if the clicked element is a calendar cell with the desired class
                 if (event.target.classList.contains('mbsc-calendar-cell-text')) {
@@ -142,7 +143,7 @@
                     const ariaLabel = event.target.getAttribute('aria-label');
                     if (ariaLabel) {
                         // Extract the date from the aria-label (assuming format like "Monday, December 9, 2024")
-                        // const date = ariaLabel.split(', ')[1];
+                        // selectedDate = ariaLabel.split(', ')[1];
 
 
                         // Show the modal
@@ -213,6 +214,7 @@
                 e.preventDefault(); // Prevent the default form submission
 
                 const appointmentData = {
+                    bookingDate : selectedDate,
                     startTime: $('#appointmentStartingTime').val(),
                     endTime: $('#appointmentEndingTime').val(),
                     description: $('#description').val(),
@@ -233,11 +235,12 @@
 
                 // Send the AJAX request
                 $.ajax({
-                    url: `/appointment-request/${userId}`,
+                    url: "/appointment-request/"+userId,
                     method: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify(appointmentData),
                     success: function (response) {
+                        console.log(response)
                         alert('Appointment successfully submitted!');
                         // Optional: Close the modal or clear the form
                         // $('#appointmentRequestForm')[0].reset();
@@ -284,6 +287,7 @@
             colors: availableDatesColor,
             // Add the onDayClick event handler
             onSelectedDateChange: function (event, inst) {
+                selectedDate = event.date;
                 console.log('Date clicked:', event.date);
             },
             onEventCreated: function (args) {

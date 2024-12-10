@@ -2,7 +2,12 @@ package com.appointment.management.pact.controllers;
 
 import com.appointment.management.pact.entity.Appointment;
 import com.appointment.management.pact.entity.User;
+import com.appointment.management.pact.entity.UserAppointment;
+import com.appointment.management.pact.payloads.AppointmentRequest;
+import com.appointment.management.pact.repository.AppointmentRepository;
+import com.appointment.management.pact.repository.UserAppointmentRepository;
 import com.appointment.management.pact.repository.UserAvailabilityRepository;
+import com.appointment.management.pact.services.HelperService;
 import com.appointment.management.pact.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +18,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,10 +27,16 @@ import java.util.stream.Collectors;
 public class BookAppointment {
 
 	@Autowired
+	private AppointmentRepository appointmentRepository;
+
+	@Autowired
 	private UserService	userService;
 
 	@Autowired
 	private UserAvailabilityRepository availabilityRepository;
+
+    @Autowired
+    private UserAppointmentRepository userAppointmentRepository;
 
 	@GetMapping("/book-appointment")
 	public String bookAppointmentView() {
@@ -58,27 +71,73 @@ public class BookAppointment {
 
 	@PostMapping("/appointment-request/{userId}")
 	public ResponseEntity<?> createAppointment(
-			@PathVariable("userId") Long userId,
-			@RequestBody Appointment appointmentRequest) {
+			@PathVariable("userId") Integer userId,
+			@RequestBody AppointmentRequest appointmentRequest) {
 
 		// Debugging: Print received data
 		System.out.println("User ID: " + userId);
+		System.out.println("Booking Date: " + appointmentRequest.getBookingDate());
 		System.out.println("Start Time: " + appointmentRequest.getStartTime());
 		System.out.println("End Time: " + appointmentRequest.getEndTime());
 		System.out.println("Description: " + appointmentRequest.getDescription());
-		System.out.println("Is All Day: " + appointmentRequest.getIsAllDay());
+		System.out.println("Is All Day: " + appointmentRequest.isAllDay());
 		System.out.println("Location: " + appointmentRequest.getLocation());
 
-		// Validate the input (Optional, can also be done via annotations)
-		if (appointmentRequest.getDescription() == null || appointmentRequest.getDescription().isEmpty()) {
-			return ResponseEntity.badRequest().body("Description is required.");
-		}
-		if (appointmentRequest.getStartTime() == null || appointmentRequest.getEndTime() == null) {
-			return ResponseEntity.badRequest().body("Start and end times are required.");
-		}
 
-		// Logic to save the appointment (Mocked here)
-		// Example: appointmentService.save(userId, appointmentRequest);
+		// LocalDate
+		ZonedDateTime zonedDateTime = ZonedDateTime.parse(appointmentRequest.getBookingDate());
+		// Adjust to the system default time zone
+		LocalDate date = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
+
+		LocalTime startTime = LocalTime.parse(appointmentRequest.getStartTime());
+		LocalTime endTime = LocalTime.parse(appointmentRequest.getEndTime());
+
+		// Merge into LocalDateTime
+		LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+		LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+		// Output the result
+		System.out.println("Merged Start Date Time: " + startDateTime);
+		System.out.println("Merged End Date Time: " + endDateTime);
+
+
+
+
+		// Create Appointment entity
+		Appointment appointment = new Appointment();
+		appointment.setStartTime(startDateTime);
+		appointment.setEndTime(endDateTime);
+		appointment.setDescription(appointmentRequest.getDescription());
+		appointment.setIsAllDay(appointmentRequest.isAllDay());
+		appointment.setLocation(appointmentRequest.getLocation());
+		appointment.setCreatedAt(LocalDateTime.now());
+
+
+
+		// Create UserAppointment entity
+		UserAppointment userAppointment = new UserAppointment();
+//		userAppointment.setAppointment(appointment);
+		userAppointment.setRole("CREATOR");
+		userAppointment.setStatus("PENDING");
+		User loggedInUser = HelperService.getLoggedInUser();
+		loggedInUser.setUserAppointments(null);
+		userAppointment.setAuthor(loggedInUser);
+
+		// Mocked User association
+		User user = new User(); // Fetch an actual User object from the DB
+		user.setUserId(userId);
+		userAppointment.setRequested_user(user);
+
+
+		appointment = appointmentRepository.save(appointment);
+		userAppointment.setAppointment(appointment);
+		userAppointment = userAppointmentRepository.save(userAppointment);
+
+		// Debugging: Print converted objects
+		System.out.println("Created Appointment: " + appointment);
+		System.out.println("Created UserAppointment: " + userAppointment);
+
+
 
 		// Success response
 		return ResponseEntity.ok("Appointment created successfully!");
