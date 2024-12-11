@@ -141,11 +141,17 @@
                 // Check if the clicked element is a calendar cell with the desired class
                 if (event.target.classList.contains('mbsc-calendar-cell-text')) {
                     // Get the aria-label value for the clicked date
-                    const ariaLabel = event.target.getAttribute('aria-label');
+                    let ariaLabel = event.target.getAttribute('aria-label');
                     if (ariaLabel) {
                         // Extract the date from the aria-label (assuming format like "Monday, December 9, 2024")
                         // selectedDate = ariaLabel.split(', ')[1];
 
+                        // Remove "Today," prefix if it exists
+                        if (ariaLabel.startsWith("Today,")) {
+                            ariaLabel = ariaLabel.replace("Today, ", ""); // Remove "Today, " prefix
+                        }
+
+                        selectedDate = ariaLabel;
 
                         // Show the modal
                         $('#availabilityModal').modal('show');
@@ -154,6 +160,7 @@
                         $('#availabilityMessage').text('Checking availability...');
 
                         var encodedDate = encodeURIComponent(ariaLabel);
+
                         var requestURL = "/check-availability/userID/"+userId+"/"+encodedDate;
 
                         // Send the AJAX request
@@ -244,11 +251,12 @@
                         console.log(response)
                         alert('Appointment successfully submitted!');
                         // Optional: Close the modal or clear the form
-                        // $('#appointmentRequestForm')[0].reset();
+                        $('#appointmentRequestForm')[0].reset();
+                        location.reload();
                     },
                     error: function (err) {
                         console.log(err);
-                        $('#availabilityMessage').text(err.responseText);
+                        // $('#availabilityMessage').text(err.responseText);
                         alert(err.responseText);
                     }
                 });
@@ -285,11 +293,15 @@
                         String startTime = ua.getAppointment().getStartTime().toString(); // Format: YYYY-MM-DDTHH:mm
                         String endTime = ua.getAppointment().getEndTime().toString();   // Format: YYYY-MM-DDTHH:mm
                         String title = ua.getAppointment().getDescription();
+                        Boolean allDay = ua.getAppointment().getIsAllDay();
                         out.print("{");
                         out.print("start: '" + startTime + "', ");
                         out.print("end: '" + endTime + "', ");
                         out.print("title: '" + title + "', ");
                         out.print("color: '" + titleColor + "'");
+                        if(allDay){
+                            out.print(", allDay: true");
+                        }
                         out.print("}");
                         if (i < appointments.size() - 1) {
                             out.print(", ");
@@ -312,7 +324,6 @@
             dragToResize: false,
             eventDelete: false,
             colors: availableDatesColor,
-            // Add the onDayClick event handler
             onSelectedDateChange: function (event, inst) {
                 selectedDate = event.date;
                 console.log('Date clicked:', event.date);
@@ -322,8 +333,12 @@
             },
             view: {
                 calendar: {
-                    labels: true,
+                    popover: true,
+                    count: true,
                 },
+                    agenda: {
+                        type: 'day'
+                    }
             },
             data: appointments,
         });

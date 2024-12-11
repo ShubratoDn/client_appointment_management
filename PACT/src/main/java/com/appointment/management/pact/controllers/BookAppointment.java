@@ -86,11 +86,19 @@ public class BookAppointment {
 		System.out.println("Is All Day: " + appointmentRequest.isAllDay());
 		System.out.println("Location: " + appointmentRequest.getLocation());
 
+		LocalDate date ;
+		try{
+			// LocalDate
+			ZonedDateTime zonedDateTime = ZonedDateTime.parse(appointmentRequest.getBookingDate());
+			// Adjust to the system default time zone
+			date = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
 
-		// LocalDate
-		ZonedDateTime zonedDateTime = ZonedDateTime.parse(appointmentRequest.getBookingDate());
-		// Adjust to the system default time zone
-		LocalDate date = zonedDateTime.withZoneSameInstant(ZoneId.systemDefault()).toLocalDate();
+		}catch (Exception e){
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy");
+			date = LocalDate.parse(appointmentRequest.getBookingDate(), formatter); // Parse the date using the formatter
+		}
+
+
 
 		LocalTime startTime = LocalTime.parse(appointmentRequest.getStartTime());
 		LocalTime endTime = LocalTime.parse(appointmentRequest.getEndTime());
