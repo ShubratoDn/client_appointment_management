@@ -13,7 +13,7 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
     // Fetch upcoming appointments
     @Query("SELECT ua FROM UserAppointment ua WHERE (ua.author.userId = :authorId " +
             "OR ua.requested_user.userId = :requestedUserId) " +
-            "AND ua.appointment.endTime > :now ORDER BY ua.appointment.startTime asc")
+            "AND ua.appointment.endTime > :now AND ua.status='APPROVED' ORDER BY ua.appointment.startTime asc")
     List<UserAppointment> findUpcomingAppointments(@Param("authorId") Integer authorId,
                                                    @Param("requestedUserId") Integer requestedUserId,
                                                    @Param("now") LocalDateTime now);
@@ -37,7 +37,8 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
     @Query("SELECT ua FROM UserAppointment ua " +
             "WHERE ua.author.userId = :userId " +
             "AND ((ua.appointment.startTime < :endTime AND ua.appointment.endTime > :startTime) " +
-            "OR (ua.appointment.startTime >= :startTime AND ua.appointment.startTime < :endTime))")
+            "OR (ua.appointment.startTime >= :startTime AND ua.appointment.startTime < :endTime))" +
+            "AND ua.status='APPROVED'")
     List<UserAppointment> findOverlappingAppointments(@Param("userId") Integer userId,
                                                       @Param("startTime") LocalDateTime startTime,
                                                       @Param("endTime") LocalDateTime endTime);
@@ -45,8 +46,9 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
 //    List<UserAppointment> findAllByAuthor(User user);
 
     @Query("SELECT ua FROM UserAppointment ua " +
-            "WHERE ua.author.userId = :userId " +
-            "OR ua.requested_user.userId = :userId " )
+            "WHERE (ua.author.userId = :userId " +
+            "OR ua.requested_user.userId = :userId )" +
+            "AND ua.status='APPROVED' " )
     List<UserAppointment> findAllByAuthor(@Param("userId") Integer userId);
 
 
@@ -54,7 +56,8 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
     @Query("SELECT ua FROM UserAppointment ua " +
             "WHERE (ua.author.userId = :authorId OR ua.requested_user.userId = :authorId) " +
             "AND ua.appointment.startTime >= :startOfDay " +
-            "AND ua.appointment.endTime <= :endOfDay")
+            "AND ua.appointment.endTime <= :endOfDay " +
+            "AND ua.status='APPROVED'")
     List<UserAppointment> findBookingsByAuthorAndDay(
             @Param("authorId") Integer authorId,
             @Param("startOfDay") LocalDateTime startOfDay,

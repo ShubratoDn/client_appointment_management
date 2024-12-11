@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -50,6 +51,24 @@ public class BookAppointment {
 		model.addAttribute("pendingAppointments", upcomingAppointments);
 		return "appointment-requests";
 	}
+
+	@GetMapping("/change-appointment-status/{id}/{status}")
+	public String changeStatus(@PathVariable Integer id, @PathVariable String status, Model model, RedirectAttributes redirectAttributes) {
+		UserAppointment appointment = userAppointmentRepository.findById(id).orElse(null);
+		if (appointment!= null) {
+			List<UserAppointment> overlappingAppointments = userAppointmentRepository.findOverlappingAppointments(appointment.getAuthor().getUserId(), appointment.getAppointment().getStartTime(), appointment.getAppointment().getEndTime());
+
+			if (status.equals("APPROVED") && !overlappingAppointments.isEmpty()) {
+				redirectAttributes.addFlashAttribute("errorMessage", "Author or Requested user is not available within "+ appointment.getAppointment().getStartTime() + " and "+ appointment.getAppointment().getEndTime());
+				return "redirect:/appointment-requests";
+			}
+
+			appointment.setStatus(status);
+			userAppointmentRepository.save(appointment);
+        }
+		return "redirect:/appointment-requests";
+	}
+
 
 	@GetMapping("/appointment-request/{userid}")
 	public String appointmentRequestView(@PathVariable int userid, Model model) {
