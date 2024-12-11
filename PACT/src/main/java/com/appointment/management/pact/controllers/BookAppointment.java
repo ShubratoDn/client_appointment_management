@@ -44,7 +44,10 @@ public class BookAppointment {
 	}
 	
 	@GetMapping("/appointment-requests")
-	public String appointmentRequestsView() {
+	public String appointmentRequestsView(Model model) {
+		LocalDateTime now = LocalDateTime.now();
+		List<UserAppointment> upcomingAppointments = userAppointmentRepository.findAuthorsUpcomingAppointmentsWithStatus( HelperService.getLoggedInUser().getUserId(), now, "PENDING");
+		model.addAttribute("pendingAppointments", upcomingAppointments);
 		return "appointment-requests";
 	}
 

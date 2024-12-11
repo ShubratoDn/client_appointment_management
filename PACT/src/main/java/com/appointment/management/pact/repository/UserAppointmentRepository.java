@@ -13,10 +13,17 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
     // Fetch upcoming appointments
     @Query("SELECT ua FROM UserAppointment ua WHERE (ua.author.userId = :authorId " +
             "OR ua.requested_user.userId = :requestedUserId) " +
-            "AND ua.appointment.startTime > :now ORDER BY ua.appointment.startTime asc")
+            "AND ua.appointment.endTime > :now ORDER BY ua.appointment.startTime asc")
     List<UserAppointment> findUpcomingAppointments(@Param("authorId") Integer authorId,
                                                    @Param("requestedUserId") Integer requestedUserId,
                                                    @Param("now") LocalDateTime now);
+
+
+    @Query("SELECT ua FROM UserAppointment ua WHERE ua.author.userId = :authorId " +
+            "AND ua.appointment.endTime > :now AND ua.status = :status ORDER BY ua.appointment.startTime asc")
+    List<UserAppointment> findAuthorsUpcomingAppointmentsWithStatus(@Param("authorId") Integer authorId,
+                                                   @Param("now") LocalDateTime now,
+                                                    @Param("status") String status);
 
 
 //    @Query("SELECT COUNT(ua) > 0 FROM UserAppointment ua " +
@@ -38,13 +45,14 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
 //    List<UserAppointment> findAllByAuthor(User user);
 
     @Query("SELECT ua FROM UserAppointment ua " +
-            "WHERE ua.author.userId = :userId")
+            "WHERE ua.author.userId = :userId " +
+            "OR ua.requested_user.userId = :userId " )
     List<UserAppointment> findAllByAuthor(@Param("userId") Integer userId);
 
 
 
     @Query("SELECT ua FROM UserAppointment ua " +
-            "WHERE ua.author.userId = :authorId " +
+            "WHERE (ua.author.userId = :authorId OR ua.requested_user.userId = :authorId) " +
             "AND ua.appointment.startTime >= :startOfDay " +
             "AND ua.appointment.endTime <= :endOfDay")
     List<UserAppointment> findBookingsByAuthorAndDay(
