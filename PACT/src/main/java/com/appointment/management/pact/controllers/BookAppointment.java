@@ -83,7 +83,7 @@ public class BookAppointment {
 		System.out.println("Start Time: " + appointmentRequest.getStartTime());
 		System.out.println("End Time: " + appointmentRequest.getEndTime());
 		System.out.println("Description: " + appointmentRequest.getDescription());
-		System.out.println("Is All Day: " + appointmentRequest.isAllDay());
+		System.out.println("Is All Day: " + appointmentRequest.getAllDay());
 		System.out.println("Location: " + appointmentRequest.getLocation());
 
 		LocalDate date ;
@@ -111,7 +111,26 @@ public class BookAppointment {
 		System.out.println("Merged Start Date Time: " + startDateTime);
 		System.out.println("Merged End Date Time: " + endDateTime);
 
-//		boolean userAvailable = userAppointmentRepository.isUserAvailable(userId, startDateTime, endDateTime);
+		// Generate start and end of the day
+		LocalDateTime startOfDay = date.atStartOfDay();
+		LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+		// Debugging: Print start and end of the day
+		System.out.println("Start of Day: " + startOfDay);
+		System.out.println("End of Day: " + endOfDay);
+
+
+		if(appointmentRequest.getAllDay()){
+			List<UserAppointment> bookingsByAuthorAndDay = userAppointmentRepository.findBookingsByAuthorAndDay(userId, startOfDay, endOfDay);
+
+			if(!bookingsByAuthorAndDay.isEmpty()){
+				System.out.println("User is not available whole day!");
+				return ResponseEntity.status(400).body("User is not available whole day!");
+			}else{
+				System.out.println("User is available for whole day!");
+			}
+		}
+
 
 		List<UserAppointment> overlappingAppointments = userAppointmentRepository.findOverlappingAppointments(userId, startDateTime, endDateTime);
 
@@ -125,7 +144,7 @@ public class BookAppointment {
 		appointment.setStartTime(startDateTime);
 		appointment.setEndTime(endDateTime);
 		appointment.setDescription(appointmentRequest.getDescription());
-		appointment.setIsAllDay(appointmentRequest.isAllDay());
+		appointment.setIsAllDay(appointmentRequest.getAllDay());
 		appointment.setLocation(appointmentRequest.getLocation());
 		appointment.setCreatedAt(LocalDateTime.now());
 

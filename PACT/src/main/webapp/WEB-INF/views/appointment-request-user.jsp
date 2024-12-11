@@ -175,6 +175,30 @@
                                 const startTime = data.workingHourStart;
                                 const endTime = data.workingHourEnd;
 
+
+                                document.getElementById("isAllDay").addEventListener("change", function () {
+                                    const isAllDay = this.checked;
+                                    const startingTimeField = document.getElementById("appointmentStartingTime");
+                                    const endingTimeField = document.getElementById("appointmentEndingTime");
+
+                                    if (isAllDay) {
+                                        // Set default times for all-day event
+                                        startingTimeField.value = startTime;
+                                        endingTimeField.value = endTime;
+                                        // Disable time inputs
+                                        startingTimeField.disabled = true;
+                                        endingTimeField.disabled = true;
+                                    } else {
+                                        // Enable time inputs for non-all-day events
+                                        startingTimeField.disabled = false;
+                                        endingTimeField.disabled = false;
+                                        // Clear previously set values
+                                        startingTimeField.value = "";
+                                        endingTimeField.value = "";
+                                    }
+                                });
+
+
                                 // Create the message
                                 const message = `
                                     Availability Details:
@@ -217,6 +241,11 @@
                 }
             });
 
+
+
+
+
+
             // Handle form submission via AJAX
             $('#appointmentRequestForm').submit(function (e) {
                 e.preventDefault(); // Prevent the default form submission
@@ -226,7 +255,7 @@
                     startTime: $('#appointmentStartingTime').val(),
                     endTime: $('#appointmentEndingTime').val(),
                     description: $('#description').val(),
-                    isAllDay: $('#isAllDay').is(':checked'),
+                    allDay: $('#isAllDay').is(':checked'),
                     location: $('#location').val(),
                 };
 
@@ -240,6 +269,7 @@
                     alert('Both starting and ending times are required.');
                     return;
                 }
+                console.log(appointmentData)
 
                 // Send the AJAX request
                 $.ajax({
@@ -344,6 +374,31 @@
         });
 
     </script>
+
+
+
+        <script>
+            // Wait for the page to load completely
+            window.addEventListener('load', function() {
+                // Get all the text nodes in the document
+                const textNodes = document.createTreeWalker(
+                    document.body,
+                    NodeFilter.SHOW_TEXT,
+                    null,
+                    false
+                );
+
+                let currentNode;
+                while (currentNode = textNodes.nextNode()) {
+                    // Check if the node's text contains 'TRIAL' (case-sensitive)
+                    if (currentNode.nodeValue.includes('TRIAL')) {
+                        // Remove the text by setting the content to an empty string
+                        currentNode.nodeValue = currentNode.nodeValue.replace('TRIAL', '');
+                    }
+                }
+            });
+
+        </script>
 
 
     </body>

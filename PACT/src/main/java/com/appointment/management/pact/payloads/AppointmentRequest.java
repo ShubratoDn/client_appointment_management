@@ -5,7 +5,7 @@ public class AppointmentRequest {
     private String startTime;
     private String endTime;
     private String description;
-    private boolean isAllDay;
+    private Boolean allDay;
     private String location;
 
     // Getters and Setters
@@ -33,12 +33,12 @@ public class AppointmentRequest {
         this.description = description;
     }
 
-    public boolean isAllDay() {
-        return isAllDay;
+    public Boolean getAllDay() {
+        return allDay;
     }
 
-    public void setAllDay(boolean allDay) {
-        isAllDay = allDay;
+    public void setAllDay(Boolean allDay) {
+        this.allDay = allDay;
     }
 
     public String getLocation() {

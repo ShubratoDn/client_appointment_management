@@ -40,4 +40,15 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
     @Query("SELECT ua FROM UserAppointment ua " +
             "WHERE ua.author.userId = :userId")
     List<UserAppointment> findAllByAuthor(@Param("userId") Integer userId);
+
+
+
+    @Query("SELECT ua FROM UserAppointment ua " +
+            "WHERE ua.author.userId = :authorId " +
+            "AND ua.appointment.startTime >= :startOfDay " +
+            "AND ua.appointment.endTime <= :endOfDay")
+    List<UserAppointment> findBookingsByAuthorAndDay(
+            @Param("authorId") Integer authorId,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("endOfDay") LocalDateTime endOfDay);
 }
