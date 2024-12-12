@@ -250,6 +250,13 @@
             $('#appointmentRequestForm').submit(function (e) {
                 e.preventDefault(); // Prevent the default form submission
 
+                const $submitButton = $('#submitAppointment'); // Select the submit button
+
+                // Disable the submit button to prevent multiple submissions
+                $submitButton.prop('disabled', true);
+                $submitButton.text('Please Wait...');
+
+
                 const appointmentData = {
                     bookingDate : selectedDate,
                     startTime: $('#appointmentStartingTime').val(),
@@ -288,6 +295,11 @@
                         console.log(err);
                         // $('#availabilityMessage').text(err.responseText);
                         alert(err.responseText);
+                    },
+                    complete: function () {
+                        // Re-enable the submit button after the request completes (success or error)
+                        $submitButton.prop('disabled', false);
+                        $submitButton.text('Submit Appointment');
                     }
                 });
             });

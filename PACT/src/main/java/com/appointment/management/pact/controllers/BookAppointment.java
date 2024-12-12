@@ -8,6 +8,7 @@ import com.appointment.management.pact.repository.AppointmentRepository;
 import com.appointment.management.pact.repository.UserAppointmentRepository;
 import com.appointment.management.pact.repository.UserAvailabilityRepository;
 import com.appointment.management.pact.services.HelperService;
+import com.appointment.management.pact.services.MailService;
 import com.appointment.management.pact.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +37,9 @@ public class BookAppointment {
     @Autowired
     private UserAppointmentRepository userAppointmentRepository;
 
+	@Autowired
+	private MailService mailService;
+
 	@GetMapping("/book-appointment")
 	public String bookAppointmentView() {
 		return "book-appointment";
@@ -62,6 +66,10 @@ public class BookAppointment {
 
 			appointment.setStatus(status);
 			userAppointmentRepository.save(appointment);
+
+			if(status.equals("APPROVED")){
+				mailService.notifyRequestedUserForAcceptedAppointment(appointment);
+			}
 
 			if(page != null && !page.isEmpty()){
 				return "redirect:/"+page;
@@ -206,7 +214,7 @@ public class BookAppointment {
 		System.out.println("Created Appointment: " + appointment);
 		System.out.println("Created UserAppointment: " + userAppointment);
 
-
+		mailService.notifyAuthorForNewAppointment(userAppointment);
 
 		// Success response
 		return ResponseEntity.ok("Appointment created successfully!");
