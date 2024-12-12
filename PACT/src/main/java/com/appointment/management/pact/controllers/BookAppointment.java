@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.*;
@@ -53,7 +50,7 @@ public class BookAppointment {
 	}
 
 	@GetMapping("/change-appointment-status/{id}/{status}")
-	public String changeStatus(@PathVariable Integer id, @PathVariable String status, Model model, RedirectAttributes redirectAttributes) {
+	public String changeStatus(@PathVariable Integer id, @PathVariable String status, @RequestParam(name = "page", required = false) String page, Model model, RedirectAttributes redirectAttributes) {
 		UserAppointment appointment = userAppointmentRepository.findById(id).orElse(null);
 		if (appointment!= null) {
 			List<UserAppointment> overlappingAppointments = userAppointmentRepository.findOverlappingAppointments(appointment.getAuthor().getUserId(), appointment.getAppointment().getStartTime(), appointment.getAppointment().getEndTime());
@@ -65,8 +62,22 @@ public class BookAppointment {
 
 			appointment.setStatus(status);
 			userAppointmentRepository.save(appointment);
+
+			if(page != null && !page.isEmpty()){
+				return "redirect:/"+page;
+			}
+
         }
 		return "redirect:/appointment-requests";
+	}
+
+
+	@GetMapping("/requested-appointment")
+	public String requestedAppointmentView(Model model) {
+		LocalDateTime now = LocalDateTime.now();
+		List<UserAppointment> upcomingAppointments = userAppointmentRepository.findRequestedUsersUpcomingAppointmentsWithStatus( HelperService.getLoggedInUser().getUserId(), now, "PENDING");
+		model.addAttribute("pendingAppointments", upcomingAppointments);
+		return "requested-appointment";
 	}
 
 

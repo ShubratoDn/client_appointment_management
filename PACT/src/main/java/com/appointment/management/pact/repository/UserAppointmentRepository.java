@@ -25,6 +25,12 @@ public interface UserAppointmentRepository extends JpaRepository<UserAppointment
                                                    @Param("now") LocalDateTime now,
                                                     @Param("status") String status);
 
+    @Query("SELECT ua FROM UserAppointment ua WHERE ua.requested_user.userId = :authorId " +
+            "AND ua.appointment.endTime > :now AND ua.status = :status ORDER BY ua.appointment.startTime asc")
+    List<UserAppointment> findRequestedUsersUpcomingAppointmentsWithStatus(@Param("authorId") Integer authorId,
+                                                                    @Param("now") LocalDateTime now,
+                                                                    @Param("status") String status);
+
 
 //    @Query("SELECT COUNT(ua) > 0 FROM UserAppointment ua " +
 //            "WHERE ua.author.userId = :userId " +

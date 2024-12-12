@@ -35,6 +35,14 @@
                     Appointment Requests
                 </a>
 
+                </a>
+
+                <a class="nav-link" href="/requested-appointment">
+                    <div class="sb-nav-link-icon">
+                        <i class="fas fa-address-book"></i>
+                    </div>
+                    Requested Appointment
+                </a>
 
             </div>
         </div>
